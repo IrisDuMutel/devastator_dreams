@@ -1,0 +1,11 @@
+Header header
+uint32 num_boxes
+float32[] ymin_px
+float32[] xmin_px
+float32[] ymax_px
+float32[] xmax_px
+string[] object
+float32[] score
+float32[] depth
+float32 height
+float32 width

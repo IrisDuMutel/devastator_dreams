@@ -1,0 +1,12 @@
+<launch>
+
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+        <arg name="color_fps" value="15"/>
+        <!-- aggiungere dim rgb e depth -->
+    </include>
+    <node pkg="realsense_object_detection" name="CNN_objectdetection" type="CNN_objDet.py" output="screen"/>
+    <!-- <node pkg="realsense_object_detection" name="depth_objDet_realsense" type="depth_objDet_realsense" output="screen"/> --> -->
+    <!-- <node pkg="realsense_object_detection" name="realsense_feature_detection" type="feature_detection_realsense" output="screen" /> -->
+    <node pkg="realsense_object_detection" name="realsense_tracking" type="tracking_realsense" output="screen" />
+
+</launch>
