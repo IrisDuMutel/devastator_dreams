@@ -2,7 +2,7 @@
 
 
 ## This node is in charge of three main tasks:
-#    · Receiving images from the RealsSense
+#    · Receiving images from the RealSense
 #    · Stitching such images into a unique panoramic image
 #    · Publishing panoramic image into topic to Unity
 #    · Moving the head of the Devastator to capture different images

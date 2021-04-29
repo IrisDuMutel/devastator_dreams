@@ -146,8 +146,8 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/mydreams_node.cpp)
-add_executable(depth_objDet_realsense src/depth_objDet.cpp)
-target_link_libraries(depth_objDet_realsense ${catkin_LIBRARIES})
+add_executable(depth_objDet_dreams src/depth_objDet.cpp)
+target_link_libraries(depth_objDet_dreams ${catkin_LIBRARIES})
 # add_dependencies(depth_objDet ${catkin_EXPORTED_TARGETS})
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
