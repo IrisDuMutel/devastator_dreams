@@ -22,7 +22,7 @@ from imgstitcher import Stitcher
 
 
 
-class thenode:
+class StitcherNode:
 
     def __init__(self):
         self.movinghead = False          
