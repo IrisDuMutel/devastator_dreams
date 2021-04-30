@@ -175,7 +175,8 @@ target_link_libraries(depth_objDet_dreams ${catkin_LIBRARIES})
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
   src/CNN_objDet.py
-  src/thenode.py
+  src/Snapshot.py
+  src/SimplePublisher.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

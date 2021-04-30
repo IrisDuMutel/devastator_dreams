@@ -27,9 +27,14 @@
 #include <opencv2/imgproc.hpp>
 #include <cv_bridge/cv_bridge.h>
 
-#include <librealsense2/rs.hpp>
 
-// typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
+// WHAT IS THIS NODE FOR?
+// This node adds to the message coming from CNN_onjDet. 
+// The message is read and depth is added to each object,
+// and then published for Unity.
+
+// #include <librealsense2/rs.hpp>
+
 int nn_input_size[2];
 
 
@@ -111,7 +116,7 @@ int main(int argc, char **argv)
 
   image_transport::ImageTransport img_tran(n);
   
-  message_filters::Subscriber<mydreams::ObjectDetectionBoxes> boxes_sub(n, "/DetectionBoxes", 1);
+  message_filters::Subscriber<mydreams::ObjectDetectionBoxes> boxes_sub(n, "/DetectionBoxes",1);
   // message_filters::Subscriber<PointCloud> pointcloud_sub(n, "/pico_flexx/points", 1);
 
   ImageSubscriber depth_sub(img_tran, "/panoramicd_img", 1);
@@ -119,12 +124,6 @@ int main(int argc, char **argv)
   message_filters::Synchronizer<MySyncPolicy> synchro(MySyncPolicy(1), boxes_sub, depth_sub);
   // message_filters::TimeSynchronizer<object_detection_pico::ObjectDetectionBoxes, PointCloud> synchro(boxes_sub, pointcloud_sub, 1);
   synchro.registerCallback(boost::bind(&boxesCallback, _1, _2, depth_pub));
-
-  /**
-   * ros::spin() will enter a loop, pumping callbacks.  With this version, all
-   * callbacks will be called from within this thread (the main one).  ros::spin()
-   * will exit when Ctrl-C is pressed, or the node is shutdown by the master.
-   */
   ros::spin();
 
   return 0;
