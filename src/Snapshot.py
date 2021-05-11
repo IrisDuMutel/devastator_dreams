@@ -12,13 +12,13 @@ from mydreams.msg import ObjectDetectionBoxes
 from sensor_msgs.msg import Image, CameraInfo
 from cv_bridge import CvBridge
 import cv2
-import imutils
+# import imutils
 import message_filters
 import os
 import sys
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, dir_path)
-from imgstitcher import Stitcher
+# from imgstitcher import Stitcher
 # TODO Import Pymata to use arduino in lattepanda
 
 
@@ -44,8 +44,8 @@ class Snapshot:
         self.images_sub   = message_filters.Subscriber("/camera/color/image_raw", Image, queue_size=1, buff_size=2**24)
         self.depth_sub   = message_filters.Subscriber("/camera/depth/image_rect_raw", Image, queue_size=1, buff_size=2**24)
         # self.headflag_sub   = message_filters.Subscriber("/moveHead_flag", bool), self.headflag_sub
-        ts = message_filters.ApproximateTimeSynchronizer([self.images_sub, self.depth_sub], queue_size=10, slop=0.5, allow_headerless=True)
-        ts.registerCallback(callback,self.pub)
+        ts = message_filters.ApproximateTimeSynchronizer([self.images_sub, self.depth_sub], queue_size=10, slop=1, allow_headerless=True)
+        ts.registerCallback(self._callback,self.pubrgb,self.pubd)
         self.takePhoto = True
         # test_img = cv2.imread("../images/test.jpg")
         # test_img = bridge.imgmsg_to_cv2(test_img, desired_encoding="passthrough")
@@ -55,18 +55,19 @@ class Snapshot:
         rospy.spin()
 
 #TODO: check if it is necessary to write self.images_sub,self.headflag_sub
-    def callback(self,pubrgb,pubd):
+    def _callback(self,img_rgb,img_depth,pubrgb,pubd):
         
         if self.takePhoto:
-            imagergb_RS = bridge.imgmsg_to_cv2(self.images_sub, desired_encoding="bgr8")
-            imaged_RS = bridge.imgmsg_to_cv2(self.depth_sub, desired_encoding="mono8")
+            imagergb_RS = self.bridge.imgmsg_to_cv2(img_rgb, desired_encoding="passthrough")
+            # rospy.loginfo(desired_encoding)
+            imaged_RS = self.bridge.imgmsg_to_cv2(img_depth, desired_encoding="passthrough")
             # There are no images saved to be compared: save first image
-            cv2.imwrite('panoramic_rgb.jpg',imagergb_RS)
-            cv2.imwrite('panoramic_depth.jpg',imaged_RS)
-            imgrgb_pub = self.bridge.cv2_to_imgmsg(imagergb_RS, encoding='passthrough')
-            imgd_pub = self.bridge.cv2_to_imgmsg(imaged_RS, encoding='passthrough')
-            self.pubrgb.publish(imgrgb_pub)
-            self.pubd.publish(imgd_pub) 
+            cv2.imwrite('/home/iris/catkin_ws/src/devastator_dreams/images/panoramic_rgb.jpg',imagergb_RS)
+            cv2.imwrite('/home/iris/catkin_ws/src/devastator_dreams/images/panoramic_depth.jpg',imaged_RS)
+            imgrgb_pub = self.bridge.cv2_to_imgmsg(imagergb_RS)
+            imgd_pub = self.bridge.cv2_to_imgmsg(imaged_RS)
+            pubrgb.publish(imgrgb_pub)
+            pubd.publish(imgd_pub) 
             
         else:
 
@@ -85,7 +86,7 @@ class Snapshot:
             #     imgd_pub = self.bridge.cv2_to_imgmsg(result_d, encoding='passthrough')
             #     self.pubrgb.publish(imgrgb_pub)
             #     self.pubd.publish(imgd_pub)    
-
+            pass
 
 if __name__ == '__main__':
-    thisnode= Snapshot()
+    thisnode = Snapshot()

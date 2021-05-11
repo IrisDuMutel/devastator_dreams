@@ -179,8 +179,8 @@ class ObjectDetection:
       # rospy.loginfo("Image received.")
       before = rospy.get_rostime()
 
-      image_np = self.bridge.imgmsg_to_cv2(data, desired_encoding="bgr8")
-      # image_np = self.bridge.imgmsg_to_cv2(data, desired_encoding="8UC3")
+      # image_np = self.bridge.imgmsg_to_cv2(data, desired_encoding="bgr8")
+      image_np = self.bridge.imgmsg_to_cv2(data, desired_encoding="8UC3")
       # image_np = cv2.cvtColor(image_np, cv2.CV_8UC1)
       # rospy.loginfo(np.shape(image_np))
       cv2.namedWindow('Object Detection pure', cv2.WINDOW_NORMAL) 
