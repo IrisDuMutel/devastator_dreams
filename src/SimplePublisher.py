@@ -19,10 +19,10 @@ def SimplePublisher():
     pubrgb = rospy.Publisher("/camera/color/image_raw",Image,queue_size=10)
     pubd = rospy.Publisher("/camera/depth/image_rect_raw", Image, queue_size=1)
     bridge = CvBridge()
-    rate = rospy.Rate(10) # 10hz
+    rate = rospy.Rate(30) # 10hz
     
     while not rospy.is_shutdown():
-        test_img = cv2.imread("/home/iris/catkin_ws/src/devastator_dreams/images/test.jpg")
+        test_img = cv2.imread("/home/administrator/catkin_ws/src/devastator_dreams/images/test.jpg")
         test_img = cv2.resize(test_img, dsize=(0,0), fx=0.1, fy=0.1)
         # print(test_img.shape)
         ### DISPLAY IMAGE CONTENTS ###
@@ -31,7 +31,7 @@ def SimplePublisher():
         # cv2.waitKey(1)
         # cv2.resizeWindow("img1",640,640)
 
-        gray_scale = cv2.imread("/home/iris/catkin_ws/src/devastator_dreams/images/test.jpg",cv2.IMREAD_GRAYSCALE)
+        gray_scale = cv2.imread("/home/administrator/catkin_ws/src/devastator_dreams/images/test.jpg",cv2.IMREAD_GRAYSCALE)
         gray_scale = cv2.resize(gray_scale, dsize=(0,0), fx=0.1, fy=0.1)
         # print(gray_scale.shape)
         ### DISPLAY IMAGE CONTENTS ###

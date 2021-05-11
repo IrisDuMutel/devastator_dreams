@@ -240,7 +240,9 @@ class ObjectDetection:
       # print(np.shape(self.boxes_msg.box_vertices))
       # print(self.boxes_msg.num_boxes)
 
-      self.boxes_msg.header.stamp = rospy.Time.now()
+      # Be careful whe writing the stamp of a message! if you write self.boxes_msg.header.stamp = rospy.Time.now(), it wont work!
+      self.boxes_msg.header.stamp.nsecs = 0
+      self.boxes_msg.header.stamp.secs = 0
       self.pub.publish(self.boxes_msg)
 
       # image_np = image_np.numpy()
