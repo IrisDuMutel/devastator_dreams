@@ -22,8 +22,8 @@ def SimplePublisher():
     rate = rospy.Rate(10) # 10hz
     
     while not rospy.is_shutdown():
-        test_img = cv2.imread("/home/iris/catkin_ws/src/devastator_dreams/images/cup_Color.png")
-        # test_img = cv2.resize(test_img, dsize=(0,0), fx=0.1, fy=0.1)
+        test_img = cv2.imread("/home/iris/catkin_ws/src/devastator_dreams/images/test.jpg")
+        test_img = cv2.resize(test_img, dsize=(0,0), fx=0.1, fy=0.1)
         # print(test_img.shape)
         ### DISPLAY IMAGE CONTENTS ###
         # cv2.namedWindow("img1",cv2.WINDOW_NORMAL)
@@ -31,8 +31,8 @@ def SimplePublisher():
         # cv2.waitKey(1)
         # cv2.resizeWindow("img1",640,640)
 
-        gray_scale = cv2.imread("/home/iris/catkin_ws/src/devastator_dreams/images/cup_Color.png",cv2.IMREAD_GRAYSCALE)
-        # gray_scale = cv2.resize(gray_scale, dsize=(0,0), fx=0.1, fy=0.1)
+        gray_scale = cv2.imread("/home/iris/catkin_ws/src/devastator_dreams/images/test.jpg",cv2.IMREAD_GRAYSCALE)
+        gray_scale = cv2.resize(gray_scale, dsize=(0,0), fx=0.1, fy=0.1)
         # print(gray_scale.shape)
         ### DISPLAY IMAGE CONTENTS ###
         # cv2.namedWindow("img2",cv2.WINDOW_NORMAL)
