@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_conversions
   message_filters
   image_transport
+  geometry_msgs
   # python-tensorflow-pip # name seen in the file python.yaml in rosdep folder
 )
 find_package(OpenCV REQUIRED)
@@ -78,7 +79,8 @@ add_message_files(DIRECTORY msg
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES
-  std_msgs  # Or other packages containing msgs
+  std_msgs 
+  geometry_msgs # Or other packages containing msgs
 )
 
 ################################################
@@ -113,7 +115,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES object_detection_pico
- CATKIN_DEPENDS roscpp rospy std_msg message_runtime
+ CATKIN_DEPENDS roscpp rospy std_msg message_runtime geometry_msgs
 #  DEPENDS system_lib
 )
 
@@ -177,6 +179,7 @@ catkin_install_python(PROGRAMS
   src/CNN_objDet.py
   src/Snapshot.py
   src/SimplePublisher.py
+  # src/test_pub.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

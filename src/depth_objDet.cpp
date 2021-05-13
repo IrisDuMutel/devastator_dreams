@@ -41,32 +41,25 @@
 
 int nn_input_size[2];
 
-
 typedef message_filters::sync_policies::ApproximateTime<mydreams::ObjectDetectionBoxes, sensor_msgs::Image> MySyncPolicy;
 typedef image_transport::SubscriberFilter ImageSubscriber; // Using image transport package
-/**
- * This tutorial demonstrates simple receipt of messages over the ROS system.
- */
+
+// CALLBACK DEFINITION
 void boxesCallback(ros::Publisher& pub, const mydreams::ObjectDetectionBoxes::ConstPtr& boxes_msg, 
-                    const sensor_msgs::ImageConstPtr& depth_image_msg ) //::ConstPtr&
+                    const sensor_msgs::ImageConstPtr& depth_image_msg ) 
 {
+
   ROS_INFO("I heard: ");
   // printf("const char *__restrict __format, ...");
+
+  // IF OBJECTS WERE FOUND, THEN ENTER IF
   if (!iszero(boxes_msg->num_boxes))
   {
-    // ROS_INFO("I heard: %s", boxes_msg->object[0].c_str());
   
-    // float *depth_array = new float[pointcloud_msg->width*pointcloud_msg->height]; // Since it's big I put it in the heap memory!
-    // float *depth_array = (float*)malloc(sizeof(float) * depth_image_msg->width*depth_image_msg->height);
+
     cv_bridge::CvImagePtr cv_ptr;
-    struct Point {
-    float x;
-    float y;
-    float z;
-    float w;
-    };
-    Point my_array[boxes_msg->num_boxes - 1];
-    Point point;
+
+    
     try
     {
       cv_ptr = cv_bridge::toCvCopy(depth_image_msg, "");
@@ -76,22 +69,32 @@ void boxesCallback(ros::Publisher& pub, const mydreams::ObjectDetectionBoxes::Co
       ROS_ERROR("cv_bridge exception: %s", e.what());
       return;
     }
-    // ROS_INFO("vertices: %f %f %f %f ", boxes_msg->box_vertices[0], boxes_msg->box_vertices[1], boxes_msg->box_vertices[2], boxes_msg->box_vertices[3]);
+
+    // INITIALIZATION OF VARIABLES
+    // struct Point {
+    //   float x;
+    //   float y;
+    //   float z;
+    //   float w;
+    // };
+
+    // Point my_array[boxes_msg->num_boxes - 1];
+    // Point point;
+
     std::vector<double> mean_depth(boxes_msg->num_boxes);
     double min_depth[boxes_msg->num_boxes];
     mydreams::UnityScene boxesDepth_msg;
+
+    // FOR EACH OBJECT DETECTED
     for (int i = 0; i < boxes_msg->num_boxes; i++)
     {
-      const float ymin_px = std::round(boxes_msg->box_vertices[i*4]*depth_image_msg->height);
-      const float xmin_px = std::round(boxes_msg->box_vertices[i*4+1]*depth_image_msg->width);
-      const float ymax_px = std::round(boxes_msg->box_vertices[i*4+2]*depth_image_msg->height);
-      const float xmax_px = std::round(boxes_msg->box_vertices[i*4+3]*depth_image_msg->width);
-      ROS_INFO("vertices: %f %f %f %f ", ymin_px, ymax_px, xmin_px, xmax_px);
+      const uint32_t ymin_px = std::round(boxes_msg->box_vertices[i*4]*depth_image_msg->height);
+      const uint32_t xmin_px = std::round(boxes_msg->box_vertices[i*4+1]*depth_image_msg->width);
+      const uint32_t ymax_px = std::round(boxes_msg->box_vertices[i*4+2]*depth_image_msg->height);
+      const uint32_t xmax_px = std::round(boxes_msg->box_vertices[i*4+3]*depth_image_msg->width);
+      // ROS_INFO("vertices: %f %f %f %f ", ymin_px, ymax_px, xmin_px, xmax_px);
       
-      Point my_array[boxes_msg->num_boxes - 1];
-      Point point;
-      
-      // // FIXME: sometimes this script throw an opencv error about a matrix with negative dims DONE! a box_vertices was negative and/or out-of-bounds!!
+      // FIXME: sometimes this script throw an opencv error about a matrix with negative dims DONE! a box_vertices was negative and/or out-of-bounds!!
       if (ymax_px > 0 && ymax_px < depth_image_msg->height && ymin_px > 0 && xmax_px > 0 && xmax_px < depth_image_msg->width && xmin_px > 0)
       {
         cv::Mat area_box = cv_ptr->image(cv::Range(ymin_px, ymax_px), cv::Range(xmin_px, xmax_px));   // Creating a sub array of the points within the box
@@ -100,58 +103,66 @@ void boxesCallback(ros::Publisher& pub, const mydreams::ObjectDetectionBoxes::Co
           mean_depth[i] = cv::mean(area_box)[0];
           cv::minMaxIdx(area_box, &min_depth[i], NULL, NULL, NULL);
           ROS_INFO("Object: %s at distance %f [min: %f]", boxes_msg->object[i].c_str(), mean_depth[i], min_depth[i]);
-          ROS_INFO("i is equal to:  %d", i);
-          point.x = ymin_px;
-          point.y = xmin_px;
-          point.w = ymax_px;
-          point.z = xmax_px;
-          my_array[i] = point;
-          // boxesDepth_msg.ymin_px[i] = ymin_px;
-          // boxesDepth_msg.xmin_px[i] = xmin_px;
-          // boxesDepth_msg.ymax_px[i] = ymax_px;
-          // boxesDepth_msg.xmax_px[i] = xmax_px;
+          // ROS_INFO("i is equal to:  %d", i);
+          // point.x = ymin_px;
+          // point.y = xmin_px;
+          // point.w = ymax_px;
+          // point.z = xmax_px;
+          // my_array[i] = point;
+          boxesDepth_msg.ymin_px.push_back(ymin_px);
+          boxesDepth_msg.xmin_px.push_back(xmin_px);
+          boxesDepth_msg.ymax_px.push_back(ymax_px);
+          boxesDepth_msg.xmax_px.push_back(xmax_px);
         }
       }
       
 
 
     }
+
     // boxesDepth_msg.header.stamp = ros::Time::now();
     // std::copy(std::begin(boxes_msg->score), std::end(boxes_msg->score), std::begin(boxesDepth_msg.score));
+    for (std::vector<float>::const_iterator it = boxes_msg->score.begin(); it != boxes_msg->score.end(); ++it) {
+      boxesDepth_msg.score.push_back(*it);
+    }
     // std::copy(std::begin(mean_depth), std::end(mean_depth), std::begin(boxesDepth_msg.depth));
-    // boxesDepth_msg.num_boxes = boxes_msg->num_boxes;
-    // for (size_t i=0; i<boxes_msg->num_boxes; i++)
-    // {
-        // boxesDepth_msg.object[i] = boxes_msg->object[i];
-    // }
-    // boxesDepth_msg.height = depth_image_msg->height;
-    // boxesDepth_msg.width = depth_image_msg->width;
-    // pub.publish(boxesDepth_msg);
+    for (std::vector<double>::const_iterator it = mean_depth.begin(); it != mean_depth.end(); ++it) {
+      boxesDepth_msg.depth.push_back(*it);
+    }
+
+
+    boxesDepth_msg.num_boxes = boxes_msg->num_boxes;
+    for (size_t i=0; i<boxes_msg->num_boxes; i++)
+    {
+        boxesDepth_msg.object.push_back(boxes_msg->object[i]);
+    }
+    boxesDepth_msg.height = depth_image_msg->height;
+    boxesDepth_msg.width = depth_image_msg->width;
+    pub.publish(boxesDepth_msg);
   }
 }
 
 int main(int argc, char **argv)
 {
-
+  // NODE INITIALIZATION
   ros::init(argc, argv, "depth");
   ros::NodeHandle n;
+
   n.getParam("nn_input_size", *nn_input_size);
 
-  image_transport::ImageTransport img_tran(n);
-  
-  // message_filters::Subscriber<sensor_msgs::Image> boxes_sub(n, "panoramicrgb_img",1);
+  // SUBSCRIBERS
   message_filters::Subscriber<sensor_msgs::Image> depth_sub(n, "/panoramicd_img",1);
   message_filters::Subscriber<mydreams::ObjectDetectionBoxes> boxes_sub(n, "/DetectionBoxes",1);
 
-  // ImageSubscriber depth_sub(img_tran, "/panoramicd_img", 1);
-  
-  message_filters::Synchronizer<MySyncPolicy> synchro(MySyncPolicy(1), boxes_sub, depth_sub);
-  // message_filters::TimeSynchronizer<object_detection_pico::ObjectDetectionBoxes, PointCloud> synchro(boxes_sub, pointcloud_sub, 1);
-  
+
+  // PUBLISHERS
   ros::Publisher depth_pub = n.advertise<mydreams::UnityScene>("unity_input", 1);
+
+  // SYNCHORONIZER
+  message_filters::Synchronizer<MySyncPolicy> synchro(MySyncPolicy(1), boxes_sub, depth_sub);
   synchro.registerCallback(boost::bind(&boxesCallback,boost::ref(depth_pub), _1, _2/*, depth_pub*/));
   
+  // Keep the node spinning
   ros::spin();
-
   return 0;
 }

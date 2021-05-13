@@ -16,5 +16,5 @@
     <node pkg="mydreams" name="SimplePublisher" type="SimplePublisher.py" output="screen"/>
     <node pkg="mydreams" name="Snapshot" type="Snapshot.py" output="screen"/>
     <node pkg="mydreams" name="CNN_objDet" type="CNN_objDet.py" output="screen"/>
-    <!-- <node pkg="mydreams" name="depth_objDet_dreams" type="depth_objDet_dreams" output="screen"/> -->
+    <node pkg="mydreams" name="depth_objDet_dreams" type="depth_objDet_dreams" output="screen"/>
 </launch>
