@@ -50,6 +50,7 @@ class Snapshot:
         # test_img = cv2.imread("../images/test.jpg")
         # test_img = bridge.imgmsg_to_cv2(test_img, desired_encoding="passthrough")
         # self.pubrgb.publish(test_img)
+        # self.rate = rospy.Rate(1)
     
         # spin() simply keeps python from exiting until this node is stopped
         rospy.spin()
@@ -66,6 +67,7 @@ class Snapshot:
             cv2.imwrite('/home/iris/catkin_ws/src/devastator_dreams/images/panoramic_depth.jpg',imaged_RS)
             imgrgb_pub = self.bridge.cv2_to_imgmsg(imagergb_RS)
             imgd_pub = self.bridge.cv2_to_imgmsg(imaged_RS)
+            rospy.sleep(0.25) # This limits the oublishing rate.Be careful, it can bother sometimes
             pubrgb.publish(imgrgb_pub)
             pubd.publish(imgd_pub) 
             

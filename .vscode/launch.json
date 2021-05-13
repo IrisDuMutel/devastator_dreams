@@ -7,7 +7,7 @@
         {
             "name": "ROS: Launch",
             "request": "launch",
-            "target": "/home/iris/catkin_ws/src/devastator_dreams/launch/Dreaming.launch",
+            "target": "/home/administrator/catkin_ws/src/devastator_dreams/launch/Dreaming.launch",
             "type": "ros"
         }
     ]

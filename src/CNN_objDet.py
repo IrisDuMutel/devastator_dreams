@@ -95,7 +95,6 @@ class ObjectDetection:
     self.bridge = CvBridge()
 
     self.pub = rospy.Publisher("DetectionBoxes", ObjectDetectionBoxes, queue_size=1)
-    # self.rate = rospy.Rate()
     self.boxes_msg = ObjectDetectionBoxes()
 
     # cv2.namedWindow('Object Detection', cv2.WINDOW_NORMAL)
@@ -282,6 +281,7 @@ class ObjectDetection:
       rospy.init_node('cnn_object_detection', anonymous=True)
 
       rospy.Subscriber("/panoramicrgb_img", img, self.__callback, queue_size=1, buff_size=2**24) # INCREASE BUFF SIZE TO REMOVE INCREASING DELAY OF CALLBACK
+      self.rate = rospy.Rate(10)
 
       # spin() simply keeps python from exiting until this node is stopped
       rospy.spin()

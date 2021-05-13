@@ -49,8 +49,8 @@ void boxesCallback(ros::Publisher& pub, const mydreams::ObjectDetectionBoxes::Co
                     const sensor_msgs::ImageConstPtr& depth_image_msg ) 
 {
 
-  ROS_INFO("I heard: ");
-  // printf("const char *__restrict __format, ...");
+  // ROS_INFO("I heard: ");
+  // // printf("const char *__restrict __format, ...");
 
   // IF OBJECTS WERE FOUND, THEN ENTER IF
   if (!iszero(boxes_msg->num_boxes))
@@ -70,17 +70,6 @@ void boxesCallback(ros::Publisher& pub, const mydreams::ObjectDetectionBoxes::Co
       return;
     }
 
-    // INITIALIZATION OF VARIABLES
-    // struct Point {
-    //   float x;
-    //   float y;
-    //   float z;
-    //   float w;
-    // };
-
-    // Point my_array[boxes_msg->num_boxes - 1];
-    // Point point;
-
     std::vector<double> mean_depth(boxes_msg->num_boxes);
     double min_depth[boxes_msg->num_boxes];
     mydreams::UnityScene boxesDepth_msg;
@@ -92,7 +81,7 @@ void boxesCallback(ros::Publisher& pub, const mydreams::ObjectDetectionBoxes::Co
       const uint32_t xmin_px = std::round(boxes_msg->box_vertices[i*4+1]*depth_image_msg->width);
       const uint32_t ymax_px = std::round(boxes_msg->box_vertices[i*4+2]*depth_image_msg->height);
       const uint32_t xmax_px = std::round(boxes_msg->box_vertices[i*4+3]*depth_image_msg->width);
-      // ROS_INFO("vertices: %f %f %f %f ", ymin_px, ymax_px, xmin_px, xmax_px);
+      ROS_INFO("vertices: %d %d %d %d ", ymin_px, ymax_px, xmin_px, xmax_px);
       
       // FIXME: sometimes this script throw an opencv error about a matrix with negative dims DONE! a box_vertices was negative and/or out-of-bounds!!
       if (ymax_px > 0 && ymax_px < depth_image_msg->height && ymin_px > 0 && xmax_px > 0 && xmax_px < depth_image_msg->width && xmin_px > 0)
@@ -103,39 +92,29 @@ void boxesCallback(ros::Publisher& pub, const mydreams::ObjectDetectionBoxes::Co
           mean_depth[i] = cv::mean(area_box)[0];
           cv::minMaxIdx(area_box, &min_depth[i], NULL, NULL, NULL);
           ROS_INFO("Object: %s at distance %f [min: %f]", boxes_msg->object[i].c_str(), mean_depth[i], min_depth[i]);
-          // ROS_INFO("i is equal to:  %d", i);
-          // point.x = ymin_px;
-          // point.y = xmin_px;
-          // point.w = ymax_px;
-          // point.z = xmax_px;
-          // my_array[i] = point;
           boxesDepth_msg.ymin_px.push_back(ymin_px);
           boxesDepth_msg.xmin_px.push_back(xmin_px);
           boxesDepth_msg.ymax_px.push_back(ymax_px);
           boxesDepth_msg.xmax_px.push_back(xmax_px);
         }
       }
-      
-
-
     }
-
+    
     // boxesDepth_msg.header.stamp = ros::Time::now();
-    // std::copy(std::begin(boxes_msg->score), std::end(boxes_msg->score), std::begin(boxesDepth_msg.score));
     for (std::vector<float>::const_iterator it = boxes_msg->score.begin(); it != boxes_msg->score.end(); ++it) {
       boxesDepth_msg.score.push_back(*it);
     }
-    // std::copy(std::begin(mean_depth), std::end(mean_depth), std::begin(boxesDepth_msg.depth));
+
     for (std::vector<double>::const_iterator it = mean_depth.begin(); it != mean_depth.end(); ++it) {
       boxesDepth_msg.depth.push_back(*it);
     }
-
 
     boxesDepth_msg.num_boxes = boxes_msg->num_boxes;
     for (size_t i=0; i<boxes_msg->num_boxes; i++)
     {
         boxesDepth_msg.object.push_back(boxes_msg->object[i]);
     }
+
     boxesDepth_msg.height = depth_image_msg->height;
     boxesDepth_msg.width = depth_image_msg->width;
     pub.publish(boxesDepth_msg);
@@ -152,7 +131,7 @@ int main(int argc, char **argv)
 
   // SUBSCRIBERS
   message_filters::Subscriber<sensor_msgs::Image> depth_sub(n, "/panoramicd_img",1);
-  message_filters::Subscriber<mydreams::ObjectDetectionBoxes> boxes_sub(n, "/DetectionBoxes",1);
+  message_filters::Subscriber<mydreams::ObjectDetectionBoxes> boxes_sub(n, "/DetectionBoxes",7);
 
 
   // PUBLISHERS
