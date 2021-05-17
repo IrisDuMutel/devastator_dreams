@@ -3,6 +3,8 @@ from numpy.core.shape_base import block
 # from object_detection.protos.preprocessor_pb2 import NormalizeImage
 # from tensorflow.python.ops.gen_math_ops import floor
 import rospy
+import message_filters
+
 from rospy.impl.tcpros_base import DEFAULT_BUFF_SIZE
 # from std_msgs.msg import Float32MultiArray
 from sensor_msgs.msg import CameraInfo, Image as img
@@ -94,7 +96,8 @@ class ObjectDetection:
 
     self.bridge = CvBridge()
 
-    self.pub = rospy.Publisher("DetectionBoxes", ObjectDetectionBoxes, queue_size=1)
+    self.pudDetBox = rospy.Publisher("DetectionBoxes", ObjectDetectionBoxes, queue_size=1)
+    self.pubDepthImg = rospy.Publisher("/panoramicd_img", img, queue_size=1)
     self.boxes_msg = ObjectDetectionBoxes()
 
     # cv2.namedWindow('Object Detection', cv2.WINDOW_NORMAL)
@@ -173,13 +176,13 @@ class ObjectDetection:
     tensor = np.squeeze(interpreter.get_tensor(output_details['index'])) # Getting the tensor corresponding to that index
     return tensor
   
-  def __callback(self, data):
-      # rospy.loginfo(rospy.get_caller_id() + "I heard %d x %d", data.height, data.width)
+  def __callback(self, color_sub,depth_sub):
+      # rospy.loginfo(rospy.get_caller_id() + "I heard %d x %d", color_sub.height, color_sub.width)
       # rospy.loginfo("Image received.")
       before = rospy.get_rostime()
 
-      # image_np = self.bridge.imgmsg_to_cv2(data, desired_encoding="bgr8")
-      image_np = self.bridge.imgmsg_to_cv2(data, desired_encoding="8UC3")
+      # image_np = self.bridge.imgmsg_to_cv2(color_sub, desired_encoding="bgr8")
+      image_np = self.bridge.imgmsg_to_cv2(color_sub, desired_encoding="8UC3")
       # image_np = cv2.cvtColor(image_np, cv2.CV_8UC1)
       # rospy.loginfo(np.shape(image_np))
       cv2.namedWindow('Object Detection pure', cv2.WINDOW_NORMAL) 
@@ -229,8 +232,8 @@ class ObjectDetection:
           self.boxes_msg.box_vertices = np.append(self.boxes_msg.box_vertices, boxes[box])
           self.boxes_msg.num_boxes += 1
           if True:
-            y_min, x_min = int(boxes[box][0]*data.height), int(boxes[box][1]*data.width)
-            y_max, x_max = int(boxes[box][2]*data.height) , int(boxes[box][3]*data.width)
+            y_min, x_min = int(boxes[box][0]*color_sub.height), int(boxes[box][1]*color_sub.width)
+            y_max, x_max = int(boxes[box][2]*color_sub.height) , int(boxes[box][3]*color_sub.width)
             self.image_np = cv2.rectangle(image_np,(x_min, y_min), (x_max, y_max), (0,0,255), 3)
             self.imready = True
 
@@ -242,7 +245,10 @@ class ObjectDetection:
       # Be careful whe writing the stamp of a message! if you write self.boxes_msg.header.stamp = rospy.Time.now(), it wont work!
       self.boxes_msg.header.stamp.nsecs = 0
       self.boxes_msg.header.stamp.secs = 0
-      self.pub.publish(self.boxes_msg)
+      self.pudDetBox.publish(self.boxes_msg)
+      # imgg = img()
+      # imgg = depth_sub
+      self.pubDepthImg.publish(depth_sub)
 
       # image_np = image_np.numpy()
       # image_np_with_detections = image_np.copy() # Copy the image BEFORE undergoing preprocessing!!
@@ -280,7 +286,11 @@ class ObjectDetection:
       # run simultaneously.
       rospy.init_node('cnn_object_detection', anonymous=True)
 
-      rospy.Subscriber("/panoramicrgb_img", img, self.__callback, queue_size=1, buff_size=2**24) # INCREASE BUFF SIZE TO REMOVE INCREASING DELAY OF CALLBACK
+      self.color_sub = message_filters.Subscriber("/panoramicrgb_img", img, queue_size=1, buff_size=2**24) # INCREASE BUFF SIZE TO REMOVE INCREASING DELAY OF CALLBACK
+      self.depth_sub   = message_filters.Subscriber("/panoramicdepth_img", img, queue_size=1, buff_size=2**24)
+        # self.headflag_sub   = message_filters.Subscriber("/moveHead_flag", bool), self.headflag_sub
+      ts = message_filters.ApproximateTimeSynchronizer([self.color_sub, self.depth_sub], queue_size=10, slop=1, allow_headerless=True)
+      ts.registerCallback(self.__callback)
       self.rate = rospy.Rate(10)
 
       # spin() simply keeps python from exiting until this node is stopped

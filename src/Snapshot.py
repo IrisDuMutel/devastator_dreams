@@ -39,7 +39,7 @@ class Snapshot:
         rospy.init_node('thenode', anonymous=True)
 
         self.pubrgb = rospy.Publisher('/panoramicrgb_img',Image,queue_size=10)
-        self.pubd = rospy.Publisher('/panoramicd_img',Image,queue_size=10)
+        self.pubd = rospy.Publisher('/panoramicdepth_img',Image,queue_size=10)
     
         self.images_sub   = message_filters.Subscriber("/camera/color/image_raw", Image, queue_size=1, buff_size=2**24)
         self.depth_sub   = message_filters.Subscriber("/camera/depth/image_rect_raw", Image, queue_size=1, buff_size=2**24)
@@ -67,7 +67,7 @@ class Snapshot:
             cv2.imwrite('/home/iris/catkin_ws/src/devastator_dreams/images/panoramic_depth.jpg',imaged_RS)
             imgrgb_pub = self.bridge.cv2_to_imgmsg(imagergb_RS)
             imgd_pub = self.bridge.cv2_to_imgmsg(imaged_RS)
-            rospy.sleep(0.25) # This limits the oublishing rate.Be careful, it can bother sometimes
+            # rospy.sleep(0.35) # This limits the oublishing rate.Be careful, it can bother sometimes
             pubrgb.publish(imgrgb_pub)
             pubd.publish(imgd_pub) 
             
